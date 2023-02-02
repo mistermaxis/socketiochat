@@ -1,0 +1,11 @@
+{
+  "name": "socketiochat",
+  "version": "1.0.0",
+  "description": "Socket.io chat application test",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Maximiliano Diaz",
+  "license": "ISC"
+}
