@@ -1,0 +1,16 @@
+{
+  "name": "socketiochat",
+  "version": "1.0.0",
+  "description": "Socket.io chat application test",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "serve": "nodemon index.js"
+  },
+  "author": "Maximiliano Diaz",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
+  }
+}
