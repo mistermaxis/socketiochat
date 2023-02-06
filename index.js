@@ -10,14 +10,14 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log(`Socket "${socket.id}" has connected`);
+  socket.broadcast.emit('connected', socket.id);
 
   socket.on('disconnect', () => {
-    console.log(`Socket "${socket.id}" has disconnected`);
+    io.emit('disconnected', socket.id);
   });
   socket.on('chat message', (msg) => {
     console.log(`Message from ${socket.id}: "${msg}"`);
-    io.emit('chat message', msg);
+    io.emit('chat message', msg, socket.id);
   });
 });
 
