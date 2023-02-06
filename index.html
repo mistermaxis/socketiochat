@@ -65,6 +65,7 @@
 </head>
 
 <body>
+  <p id="flash" style="position: sticky;"></p>
   <h1>Chat</h1>
   <ul id="messages"></ul>
   <form id="form" action="">
@@ -74,6 +75,7 @@
   <script>
     var socket = io();
 
+    var flash = document.getElementById('flash');
     var form = document.getElementById('form');
     var input = document.getElementById('input');
     var messages = document.getElementById('messages');
@@ -81,17 +83,28 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
-        socket.emit('chat message', input.value);
+        socket.emit('chat message', input.value, socket.id);
         input.value = '';
       }
     });
 
-    socket.on('chat message', (msg) => {
+    socket.on('chat message', (msg, id) => {
       var m = document.createElement('li');
-      m.textContent = msg;
+      m.textContent = `${id === socket.id ? 'You' : id}: ${msg}`;
       messages.appendChild(m);
       window.scrollTo(0, document.body.scrollHeight);
     });
+
+    socket.on('disconnected', (id) => {
+      flash.textContent = `${id} has disconnected.`;
+      setTimeout(() => {
+        flash.textContent = null;
+      }, 2500)
+    });
+
+    socket.on('connected', (id) => {
+      flash.textContent = `${id} has connected`;
+    })
   </script>
 </body>
 
