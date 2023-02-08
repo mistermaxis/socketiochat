@@ -12,6 +12,14 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
+    .nick {
+      padding: 0.25rem;
+    }
+
+    .nick * {
+      padding: 0.25rem;
+    }
+
     #form {
       background: rgba(0, 0, 0, 0.15);
       padding: 0.25rem;
@@ -66,6 +74,10 @@
 
 <body>
   <p id="flash" style="position: sticky;"></p>
+  <div class="nick">
+    <form action="" id="nick-form"><label for="nick">Enter your nickname: </label><input type="text" name="nick"
+        id="nick"></form>
+  </div>
   <h1>Chat</h1>
   <ul id="messages"></ul>
   <form id="form" action="">
@@ -77,20 +89,35 @@
 
     var flash = document.getElementById('flash');
     var form = document.getElementById('form');
+    var nickForm = document.getElementById('nick-form');
+    var nickInput = document.getElementById('nick');
+    var nick = '';
     var input = document.getElementById('input');
     var messages = document.getElementById('messages');
+
+    nickForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      nick = nickInput.value;
+      console.log(nick);
+      nickInput.value = '';
+      nickForm.remove();
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
-        socket.emit('chat message', input.value, socket.id);
+        socket.emit('chat message', input.value, nick || socket.id);
+        var m = document.createElement('li');
+        m.textContent = `You: ${input.value}`;
+        messages.appendChild(m);
+        window.scrollTo(0, document.body.scrollHeight);
         input.value = '';
       }
     });
 
     socket.on('chat message', (msg, id) => {
       var m = document.createElement('li');
-      m.textContent = `${id === socket.id ? 'You' : id}: ${msg}`;
+      m.textContent = `${id}: ${msg}`;
       messages.appendChild(m);
       window.scrollTo(0, document.body.scrollHeight);
     });
