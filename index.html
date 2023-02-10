@@ -8,8 +8,20 @@
   <style>
     body {
       margin: 0;
-      padding-bottom: 3rem;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .main {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .nick {
@@ -23,14 +35,12 @@
     #form {
       background: rgba(0, 0, 0, 0.15);
       padding: 0.25rem;
-      position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       display: flex;
       height: 3rem;
       box-sizing: border-box;
-      backdrop-filter: blur(10px);
     }
 
     #input {
@@ -57,11 +67,13 @@
 
     #messages {
       list-style-type: none;
+      flex-grow: 3;
       margin: 0;
       padding: 0;
     }
 
-    #messages>li {
+    #messages>li,
+    #typing {
       padding: 0.5rem 1rem;
     }
 
@@ -73,16 +85,21 @@
 </head>
 
 <body>
-  <p id="flash" style="position: sticky;"></p>
-  <div class="nick">
-    <form action="" id="nick-form"><label for="nick">Enter your nickname: </label><input type="text" name="nick"
-        id="nick"></form>
-  </div>
-  <h1>Chat</h1>
-  <ul id="messages"></ul>
-  <form id="form" action="">
-    <input id="input" autocomplete="off" /><button>Send</button>
-  </form>
+  <header>
+    <span id="flash" style="position: sticky;"></span>
+    <div class="nick">
+      <form action="" id="nick-form"><label for="nick">Enter your nickname: </label><input type="text" name="nick"
+          id="nick"></form>
+    </div>
+    <h1 style="text-align: center; margin: 0;">Chat</h1>
+  </header>
+  <main class="main">
+    <ul id="messages"></ul>
+    <div id="typing"></div>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+  </main>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     var socket = io();
@@ -94,6 +111,7 @@
     var nick = '';
     var input = document.getElementById('input');
     var messages = document.getElementById('messages');
+    var typing = document.getElementById('typing');
 
     nickForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -106,6 +124,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
+        socket.emit('not-typing');
         socket.emit('chat message', input.value, nick || socket.id);
         var m = document.createElement('li');
         m.textContent = `You: ${input.value}`;
@@ -115,11 +134,28 @@
       }
     });
 
+    input.addEventListener('input', (e) => {
+      if (input.value !== '') {
+        socket.emit('typing', nick || socket.id);
+      } else {
+        socket.emit('not-typing');
+      }
+    });
+
     socket.on('chat message', (msg, id) => {
       var m = document.createElement('li');
       m.textContent = `${id}: ${msg}`;
       messages.appendChild(m);
       window.scrollTo(0, document.body.scrollHeight);
+    });
+
+    socket.on('typing', (id) => {
+      typing.textContent = `${id} is typing...`;
+      typing.classList.remove('hidden');
+    });
+
+    socket.on('not-typing', () => {
+      typing.classList.add('hidden');
     });
 
     socket.on('disconnected', (id) => {

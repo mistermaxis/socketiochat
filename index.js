@@ -15,9 +15,18 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     io.emit('disconnected', socket.id);
   });
+
   socket.on('chat message', (msg, id) => {
     console.log(`Message from ${id}: "${msg}"`);
     socket.broadcast.emit('chat message', msg, id);
+  });
+
+  socket.on('typing', (id) => {
+    socket.broadcast.emit('typing', id);
+  });
+
+  socket.on('not-typing', () => {
+    socket.broadcast.emit('not-typing');
   });
 });
 
