@@ -65,14 +65,28 @@
       color: #fff;
     }
 
-    #messages {
-      list-style-type: none;
+    .container {
       flex-grow: 3;
+      display: flex;
+    }
+
+    #messages,
+    #users {
+      list-style-type: none;
       margin: 0;
       padding: 0;
     }
 
+    #users {
+      width: 30%;
+    }
+
+    #messages {
+      width: 70%;
+    }
+
     #messages>li,
+    #users>li,
     #typing {
       padding: 0.5rem 1rem;
     }
@@ -94,7 +108,10 @@
     <h1 style="text-align: center; margin: 0;">Chat</h1>
   </header>
   <main class="main">
-    <ul id="messages"></ul>
+    <div class="container">
+      <ul id="users"></ul>
+      <ul id="messages"></ul>
+    </div>
     <div id="typing"></div>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
@@ -104,7 +121,7 @@
   <script>
     var socket = io();
 
-    var flash = document.getElementById('flash');
+    var users = document.getElementById('users');
     var form = document.getElementById('form');
     var nickForm = document.getElementById('nick-form');
     var nickInput = document.getElementById('nick');
@@ -116,7 +133,6 @@
     nickForm.addEventListener('submit', (e) => {
       e.preventDefault();
       nick = nickInput.value;
-      console.log(nick);
       nickInput.value = '';
       nickForm.remove();
     });
@@ -159,14 +175,17 @@
     });
 
     socket.on('disconnected', (id) => {
-      flash.textContent = `${id} has disconnected.`;
-      setTimeout(() => {
-        flash.textContent = null;
-      }, 2500)
+      var user = document.getElementById(id);
+      if (user) {
+        users.removeChild(user);
+      }
     });
 
     socket.on('connected', (id) => {
-      flash.textContent = `${id} has connected`;
+      var user = document.createElement('li');
+      user.textContent = id;
+      user.id = id;
+      users.appendChild(user);
     })
   </script>
 </body>
